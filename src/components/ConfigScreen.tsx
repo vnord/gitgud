@@ -8,9 +8,6 @@ import {
   CardContent,
   Alert,
   CircularProgress,
-  Switch,
-  FormControlLabel,
-  Slider,
   Divider,
 } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
@@ -29,7 +26,6 @@ export const ConfigScreen = ({ onComplete }: ConfigScreenProps) => {
   const [selectedRepos, setSelectedRepos] = useState<Repository[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [showDrafts, setShowDrafts] = useState(false);
   const [staleThresholdDays, setStaleThresholdDays] = useState(7);
 
   const handleOrgSearch = async () => {
@@ -58,7 +54,6 @@ export const ConfigScreen = ({ onComplete }: ConfigScreenProps) => {
     const config = {
       organizationName: orgName,
       repositories: selectedRepos,
-      showDrafts,
       staleThresholdDays,
     };
     
@@ -74,7 +69,6 @@ export const ConfigScreen = ({ onComplete }: ConfigScreenProps) => {
         const config = JSON.parse(savedConfig);
         setOrgName(config.organizationName || '');
         setSelectedRepos(config.repositories || []);
-        setShowDrafts(config.showDrafts || false);
         setStaleThresholdDays(config.staleThresholdDays || 7);
         
         if (config.organizationName) {
@@ -159,29 +153,19 @@ export const ConfigScreen = ({ onComplete }: ConfigScreenProps) => {
               Display Options
             </Typography>
             
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={showDrafts}
-                  onChange={(e) => setShowDrafts(e.target.checked)}
-                />
-              }
-              label="Show Draft PRs"
-              sx={{ mb: 2, display: 'block' }}
-            />
-            
-            <Typography gutterBottom>
-              Stale PR Threshold (days): {staleThresholdDays}
-            </Typography>
-            <Slider
-              value={staleThresholdDays}
-              onChange={(_, value) => setStaleThresholdDays(value as number)}
-              step={1}
-              marks
-              min={1}
-              max={14}
-              valueLabelDisplay="auto"
-            />
+            <Box sx={{ mb: 2 }}>
+              <Typography gutterBottom>
+                Stale PR Threshold (days)
+              </Typography>
+              <TextField
+                type="number"
+                value={staleThresholdDays}
+                onChange={(e) => setStaleThresholdDays(Math.max(1, Math.min(30, parseInt(e.target.value) || 7)))}
+                inputProps={{ min: 1, max: 30 }}
+                helperText="PRs older than this many days will be considered stale"
+                size="small"
+              />
+            </Box>
           </Box>
           
           <Button

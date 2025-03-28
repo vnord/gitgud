@@ -15,7 +15,7 @@ import {
   AssignmentTurnedIn as ReviewRequestIcon,
 } from '@mui/icons-material';
 import { PullRequest, ReviewState } from '../types';
-import { formatTimeAgo } from '../utils/prUtils';
+import { formatTimeAgo, getRepoColor } from '../utils/prUtils';
 
 interface PRCardProps {
   pullRequest: PullRequest;
@@ -54,13 +54,24 @@ export const PRCard = ({ pullRequest }: PRCardProps) => {
     }
   };
 
+  // Get repo color for consistent visual identification
+  const repoColors = getRepoColor(pullRequest.repository.name);
+  
   return (
     <Card 
       variant="outlined"
       sx={{ 
-        borderLeft: pullRequest.userIsRequestedReviewer ? '4px solid' : 'none',
-        borderLeftColor: pullRequest.userIsRequestedReviewer ? theme.palette.info.main : 'transparent',
-        bgcolor: pullRequest.userIsRequestedReviewer ? 'rgba(25, 118, 210, 0.05)' : 'transparent',
+        borderLeft: '4px solid',
+        borderLeftColor: pullRequest.userIsRequestedReviewer 
+          ? theme.palette.info.main 
+          : repoColors.text,
+        bgcolor: pullRequest.userIsRequestedReviewer 
+          ? 'rgba(25, 118, 210, 0.05)' 
+          : `${repoColors.bg}30`, // 30 represents 19% opacity in hex
+        transition: 'all 0.2s ease-in-out',
+        '&:hover': {
+          boxShadow: `0 0 0 1px ${repoColors.text}40`,
+        }
       }}
     >
       <CardContent>
@@ -83,12 +94,25 @@ export const PRCard = ({ pullRequest }: PRCardProps) => {
               </Link>
             </Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1, mt: 1 }}>
-              <Chip
-                size="small"
-                label={pullRequest.repository.name}
-                icon={<CodeIcon />}
-                variant="outlined"
-              />
+              {/* Apply repository-specific color styling */}
+              {(() => {
+                const repoColors = getRepoColor(pullRequest.repository.name);
+                return (
+                  <Chip
+                    size="small"
+                    label={pullRequest.repository.name}
+                    icon={<CodeIcon />}
+                    sx={{
+                      bgcolor: repoColors.bg,
+                      color: repoColors.text,
+                      borderColor: repoColors.text,
+                      '& .MuiChip-icon': {
+                        color: repoColors.text
+                      }
+                    }}
+                  />
+                );
+              })()}
               <Chip
                 size="small"
                 label={`#${pullRequest.number}`}

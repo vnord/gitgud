@@ -5,7 +5,6 @@ import { AppConfig, AppConfigContextType } from '../types';
 const DEFAULT_CONFIG: AppConfig = {
   organizationName: '',
   repositories: [],
-  showDrafts: false,
   staleThresholdDays: 7,
 };
 

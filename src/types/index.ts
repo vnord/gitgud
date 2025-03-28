@@ -62,7 +62,6 @@ export interface Repository {
 export interface AppConfig {
   organizationName: string;
   repositories: Repository[];
-  showDrafts: boolean;
   staleThresholdDays: number;
 }
 

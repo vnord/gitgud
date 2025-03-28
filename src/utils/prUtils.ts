@@ -100,21 +100,21 @@ export interface FilterOptions {
   repositories: string[];
   authors: string[];
   hideStale: boolean;
+  showDrafts: boolean;
   sortBy: 'newest' | 'oldest' | 'updated' | 'title';
   prioritizeMyReviews: boolean;
 }
 
 export const filterAndSortPRs = (
   prs: PullRequest[],
-  options: FilterOptions,
-  showDrafts: boolean
+  options: FilterOptions
 ): PullRequest[] => {
   const normalizedQuery = options.searchQuery.toLowerCase().trim();
   
   // First filter the PRs
   const filteredPRs = prs.filter((pr) => {
     // Filter out drafts if not showing them
-    if (pr.draft && !showDrafts) {
+    if (pr.draft && !options.showDrafts) {
       return false;
     }
     
@@ -184,9 +184,31 @@ export const filterPRs = (
       repositories: [],
       authors: [],
       hideStale: true,
+      showDrafts: showDrafts,
       sortBy: 'updated',
       prioritizeMyReviews: true
-    },
-    showDrafts
+    }
   );
+};
+
+/**
+ * Generates a consistent color for a repository name
+ * @param repoName The repository name
+ * @returns An object with background and text colors
+ */
+export const getRepoColor = (repoName: string): { bg: string; text: string } => {
+  // Generate a hash code from the repo name
+  const hash = repoName.split('').reduce((acc, char) => {
+    return char.charCodeAt(0) + ((acc << 5) - acc);
+  }, 0);
+  
+  // Generate a hue from 0 to 360 from the hash
+  const hue = Math.abs(hash) % 360;
+  
+  // Create an HSL color with moderate saturation and lightness for bg
+  // and darker color for text to ensure readability
+  return {
+    bg: `hsl(${hue}, 80%, 90%)`,
+    text: `hsl(${hue}, 80%, 30%)`
+  };
 };
