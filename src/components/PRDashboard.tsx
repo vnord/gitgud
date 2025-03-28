@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import { FilterAlt as FilterIcon } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
+import { useConfig } from '../context/ConfigContext';
 import { PullRequest, ReviewState } from '../types';
 import { fetchAllPRs, markRequestedReviewerPRs } from '../services/githubService';
 import { groupPRsByStatus, filterAndSortPRs, FilterOptions, getRepoColor } from '../utils/prUtils';
@@ -21,6 +22,7 @@ import { PRFilters } from './PRFilters';
 
 export const PRDashboard = () => {
   const { token } = useAuth();
+  const { config } = useConfig();
   const theme = useTheme();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -31,14 +33,32 @@ export const PRDashboard = () => {
     return (savedTab as ReviewState) || 'NEEDS_REVIEW';
   });
   const [filterOptions, setFilterOptions] = useState<FilterOptions>(() => {
+    // Get prioritizeMyReviews from config
+    const config = localStorage.getItem('app_config');
+    let prioritizeMyReviews = true;
+    if (config) {
+      try {
+        const configObj = JSON.parse(config);
+        prioritizeMyReviews = configObj.prioritizeMyReviews !== undefined 
+          ? configObj.prioritizeMyReviews 
+          : true;
+      } catch (e) {
+        console.error('Error parsing config:', e);
+      }
+    }
+
+    // Try to get saved filters
     const savedFilters = localStorage.getItem('pr_filters');
     if (savedFilters) {
       try {
-        return JSON.parse(savedFilters);
+        const filters = JSON.parse(savedFilters);
+        // Override prioritizeMyReviews with the config value
+        return { ...filters, prioritizeMyReviews };
       } catch (e) {
         console.error('Error parsing saved filters:', e);
       }
     }
+    
     // Default filter options if none are saved
     return {
       searchQuery: '',
@@ -46,7 +66,7 @@ export const PRDashboard = () => {
       authors: [],
       hideStale: true,
       sortBy: 'updated',
-      prioritizeMyReviews: true
+      prioritizeMyReviews
     };
   });
 
@@ -100,6 +120,17 @@ export const PRDashboard = () => {
   useEffect(() => {
     setFilteredPRs(filterAndSortPRs(allPRs, filterOptions));
   }, [allPRs, filterOptions]);
+  
+  // Update prioritizeMyReviews when config changes
+  useEffect(() => {
+    if (config && config.prioritizeMyReviews !== undefined && 
+        config.prioritizeMyReviews !== filterOptions.prioritizeMyReviews) {
+      setFilterOptions(prev => ({
+        ...prev,
+        prioritizeMyReviews: config.prioritizeMyReviews
+      }));
+    }
+  }, [config]);
 
   // Handle filter changes
   const handleFilterChange = (newOptions: FilterOptions) => {

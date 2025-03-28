@@ -46,17 +46,6 @@ export const PRFilters = ({ pullRequests, onChange, options }: PRFiltersProps) =
     return localStorage.getItem('filters_expanded') === 'true';
   });
   
-  // Add state for view options menu
-  const [viewMenuAnchor, setViewMenuAnchor] = useState<null | HTMLElement>(null);
-  const isViewMenuOpen = Boolean(viewMenuAnchor);
-  
-  const handleViewMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setViewMenuAnchor(event.currentTarget);
-  };
-  
-  const handleViewMenuClose = () => {
-    setViewMenuAnchor(null);
-  };
   
   // Load saved filter state from localStorage on initial render
   useEffect(() => {
@@ -151,7 +140,7 @@ export const PRFilters = ({ pullRequests, onChange, options }: PRFiltersProps) =
           size="small"
         />
         
-        <Box sx={{ display: 'flex', gap: 1, height: 40 }}>
+        <Box sx={{ display: 'flex', gap: 1, height: 40, alignItems: 'center' }}>
           {/* Sort dropdown */}
           <FormControl 
             variant="outlined" 
@@ -176,6 +165,20 @@ export const PRFilters = ({ pullRequests, onChange, options }: PRFiltersProps) =
             </Select>
           </FormControl>
           
+          {/* Stale PRs toggle */}
+          <FormControlLabel
+            control={
+              <Switch 
+                checked={options.hideStale} 
+                size="small" 
+                onChange={(e) => onChange({...options, hideStale: e.target.checked})}
+                color="primary"
+              />
+            }
+            label="Hide stale"
+            sx={{ m: 0, ml: 1 }}
+          />
+          
           {/* Filter button */}
           <Button
             variant="outlined"
@@ -195,7 +198,8 @@ export const PRFilters = ({ pullRequests, onChange, options }: PRFiltersProps) =
               borderColor: activeFilterCount > 0 ? 'primary.main' : 'divider',
               '&:hover': {
                 borderColor: activeFilterCount > 0 ? 'primary.dark' : undefined
-              }
+              },
+              ml: 1
             }}
           >
             Filter
@@ -219,114 +223,7 @@ export const PRFilters = ({ pullRequests, onChange, options }: PRFiltersProps) =
               </Box>
             )}
           </Button>
-          
-          {/* View options menu button */}
-          <Button
-            variant="outlined"
-            color={
-              !options.hideStale || !options.prioritizeMyReviews 
-                ? "primary" 
-                : "inherit"
-            }
-            startIcon={<VisibilityIcon />}
-            onClick={handleViewMenuOpen}
-            aria-haspopup="true"
-            aria-expanded={isViewMenuOpen ? 'true' : undefined}
-            aria-label="View settings"
-            sx={{ 
-              minWidth: 0, 
-              width: 100,
-              height: '100%',
-              borderColor: (!options.hideStale || !options.prioritizeMyReviews) ? 'primary.main' : 'divider',
-              '&:hover': {
-                borderColor: (!options.hideStale || !options.prioritizeMyReviews) ? 'primary.dark' : undefined
-              }
-            }}
-          >
-            View
-          </Button>
         </Box>
-        
-        {/* View options menu */}
-        <Menu
-          anchorEl={viewMenuAnchor}
-          open={isViewMenuOpen}
-          onClose={handleViewMenuClose}
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'right',
-          }}
-          transformOrigin={{
-            vertical: 'top',
-            horizontal: 'right',
-          }}
-          PaperProps={{
-            elevation: 2,
-            sx: { 
-              mt: 0.5, 
-              width: 260,
-              border: '1px solid',
-              borderColor: 'divider'
-            }
-          }}
-        >
-          <Box sx={{ 
-            px: 2, 
-            py: 1, 
-            bgcolor: 'background.default', 
-            borderBottom: '1px solid', 
-            borderColor: 'divider'
-          }}>
-            <Typography variant="subtitle2" color="text.secondary">
-              Display Preferences
-            </Typography>
-          </Box>
-          
-          <MenuItem 
-            dense
-            onClick={() => {
-              onChange({...options, hideStale: !options.hideStale});
-            }}
-          >
-            <FormControlLabel
-              control={
-                <Switch 
-                  checked={options.hideStale} 
-                  size="small" 
-                  onChange={(e) => {
-                    e.stopPropagation();
-                    onChange({...options, hideStale: e.target.checked});
-                  }}
-                />
-              }
-              label="Hide stale PRs"
-              sx={{ m: 0 }}
-            />
-          </MenuItem>
-          
-          
-          <MenuItem 
-            dense
-            onClick={() => {
-              onChange({...options, prioritizeMyReviews: !options.prioritizeMyReviews});
-            }}
-          >
-            <FormControlLabel
-              control={
-                <Switch 
-                  checked={options.prioritizeMyReviews} 
-                  size="small" 
-                  onChange={(e) => {
-                    e.stopPropagation();
-                    onChange({...options, prioritizeMyReviews: e.target.checked});
-                  }}
-                />
-              }
-              label="Prioritize my review requests"
-              sx={{ m: 0 }}
-            />
-          </MenuItem>
-        </Menu>
       </Box>
       
       <Collapse in={expandedFilters}>

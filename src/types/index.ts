@@ -63,6 +63,7 @@ export interface AppConfig {
   organizationName: string;
   repositories: Repository[];
   staleThresholdDays: number;
+  prioritizeMyReviews: boolean;
 }
 
 export interface AuthContextType {

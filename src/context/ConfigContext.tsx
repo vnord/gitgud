@@ -6,6 +6,7 @@ const DEFAULT_CONFIG: AppConfig = {
   organizationName: '',
   repositories: [],
   staleThresholdDays: 7,
+  prioritizeMyReviews: true,
 };
 
 const ConfigContext = createContext<AppConfigContextType>({

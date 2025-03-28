@@ -9,6 +9,8 @@ import {
   Alert,
   CircularProgress,
   Divider,
+  FormControlLabel,
+  Switch,
 } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
 import { Repository } from '../types';
@@ -27,6 +29,7 @@ export const ConfigScreen = ({ onComplete }: ConfigScreenProps) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [staleThresholdDays, setStaleThresholdDays] = useState(7);
+  const [prioritizeMyReviews, setPrioritizeMyReviews] = useState(true);
 
   const handleOrgSearch = async () => {
     if (!orgName.trim() || !token) return;
@@ -55,6 +58,7 @@ export const ConfigScreen = ({ onComplete }: ConfigScreenProps) => {
       organizationName: orgName,
       repositories: selectedRepos,
       staleThresholdDays,
+      prioritizeMyReviews,
     };
     
     localStorage.setItem('app_config', JSON.stringify(config));
@@ -70,6 +74,7 @@ export const ConfigScreen = ({ onComplete }: ConfigScreenProps) => {
         setOrgName(config.organizationName || '');
         setSelectedRepos(config.repositories || []);
         setStaleThresholdDays(config.staleThresholdDays || 7);
+        setPrioritizeMyReviews(config.prioritizeMyReviews !== undefined ? config.prioritizeMyReviews : true);
         
         if (config.organizationName) {
           handleOrgSearch();
@@ -153,7 +158,7 @@ export const ConfigScreen = ({ onComplete }: ConfigScreenProps) => {
               Display Options
             </Typography>
             
-            <Box sx={{ mb: 2 }}>
+            <Box sx={{ mb: 3 }}>
               <Typography gutterBottom>
                 Stale PR Threshold (days)
               </Typography>
@@ -165,6 +170,22 @@ export const ConfigScreen = ({ onComplete }: ConfigScreenProps) => {
                 helperText="PRs older than this many days will be considered stale"
                 size="small"
               />
+            </Box>
+
+            <Box sx={{ mb: 2 }}>
+              <FormControlLabel
+                control={
+                  <Switch 
+                    checked={prioritizeMyReviews}
+                    onChange={(e) => setPrioritizeMyReviews(e.target.checked)}
+                    color="primary"
+                  />
+                }
+                label="Prioritize my review requests"
+              />
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', ml: 4 }}>
+                PRs where you're requested as a reviewer will be highlighted and shown first
+              </Typography>
             </Box>
           </Box>
           
