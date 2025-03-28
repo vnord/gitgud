@@ -93,31 +93,91 @@ export const formatTimeAgo = (dateStr: string): string => {
 };
 
 /**
- * Filters PRs based on search query (title, author, repo)
+ * Filters PRs based on filter options
+ */
+export interface FilterOptions {
+  searchQuery: string;
+  repositories: string[];
+  authors: string[];
+  showStale: boolean;
+  sortBy: 'newest' | 'oldest' | 'updated' | 'title';
+}
+
+export const filterAndSortPRs = (
+  prs: PullRequest[],
+  options: FilterOptions,
+  showDrafts: boolean
+): PullRequest[] => {
+  const normalizedQuery = options.searchQuery.toLowerCase().trim();
+  
+  // First filter the PRs
+  const filteredPRs = prs.filter((pr) => {
+    // Filter out drafts if not showing them
+    if (pr.draft && !showDrafts) {
+      return false;
+    }
+    
+    // Filter by repository if repositories are specified
+    if (options.repositories.length > 0 && !options.repositories.includes(pr.repository.name)) {
+      return false;
+    }
+    
+    // Filter by author if authors are specified
+    if (options.authors.length > 0 && !options.authors.includes(pr.user.login)) {
+      return false;
+    }
+    
+    // Filter by stale status if showStale is true
+    if (options.showStale && !pr.stale) {
+      return false;
+    }
+    
+    // Filter by search query if provided
+    if (normalizedQuery) {
+      return (
+        pr.title.toLowerCase().includes(normalizedQuery) ||
+        pr.user.login.toLowerCase().includes(normalizedQuery) ||
+        pr.repository.name.toLowerCase().includes(normalizedQuery)
+      );
+    }
+    
+    return true;
+  });
+  
+  // Then sort the filtered PRs
+  return [...filteredPRs].sort((a, b) => {
+    switch (options.sortBy) {
+      case 'newest':
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      case 'oldest':
+        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      case 'updated':
+        return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+      case 'title':
+        return a.title.localeCompare(b.title);
+      default:
+        return 0;
+    }
+  });
+};
+
+/**
+ * Legacy filter function (kept for backward compatibility)
  */
 export const filterPRs = (
   prs: PullRequest[],
   query: string,
   showDrafts: boolean
 ): PullRequest[] => {
-  const normalizedQuery = query.toLowerCase().trim();
-  
-  return prs.filter((pr) => {
-    // Filter out drafts if not showing them
-    if (pr.draft && !showDrafts) {
-      return false;
-    }
-    
-    // If no search query, include all PRs
-    if (!normalizedQuery) {
-      return true;
-    }
-    
-    // Search in title, author login, or repository name
-    return (
-      pr.title.toLowerCase().includes(normalizedQuery) ||
-      pr.user.login.toLowerCase().includes(normalizedQuery) ||
-      pr.repository.name.toLowerCase().includes(normalizedQuery)
-    );
-  });
+  return filterAndSortPRs(
+    prs,
+    {
+      searchQuery: query,
+      repositories: [],
+      authors: [],
+      showStale: false,
+      sortBy: 'updated'
+    },
+    showDrafts
+  );
 };

@@ -4,20 +4,20 @@ import {
   Typography,
   Alert,
   LinearProgress,
-  TextField,
-  InputAdornment,
   Grid,
   Tabs,
   Tab,
   Paper,
   useTheme,
+  Chip,
 } from '@mui/material';
-import { Search as SearchIcon } from '@mui/icons-material';
+import { FilterAlt as FilterIcon } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import { PullRequest, ReviewState } from '../types';
 import { fetchAllPRs } from '../services/githubService';
-import { groupPRsByStatus, filterPRs } from '../utils/prUtils';
+import { groupPRsByStatus, filterAndSortPRs, FilterOptions } from '../utils/prUtils';
 import { PRList } from './PRList';
+import { PRFilters } from './PRFilters';
 
 export const PRDashboard = () => {
   const { token } = useAuth();
@@ -26,8 +26,14 @@ export const PRDashboard = () => {
   const [error, setError] = useState('');
   const [allPRs, setAllPRs] = useState<PullRequest[]>([]);
   const [filteredPRs, setFilteredPRs] = useState<PullRequest[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<ReviewState>('NEEDS_REVIEW');
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>({
+    searchQuery: '',
+    repositories: [],
+    authors: [],
+    showStale: false,
+    sortBy: 'updated'
+  });
 
   // Get config from localStorage
   const getConfig = () => {
@@ -70,12 +76,17 @@ export const PRDashboard = () => {
     fetchPRs();
   }, [token]);
 
-  // Filter PRs whenever search query or PR list changes
+  // Filter PRs whenever filter options or PR list changes
   useEffect(() => {
     const config = getConfig();
     const showDrafts = config?.showDrafts || false;
-    setFilteredPRs(filterPRs(allPRs, searchQuery, showDrafts));
-  }, [allPRs, searchQuery]);
+    setFilteredPRs(filterAndSortPRs(allPRs, filterOptions, showDrafts));
+  }, [allPRs, filterOptions]);
+
+  // Handle filter changes
+  const handleFilterChange = (newOptions: FilterOptions) => {
+    setFilterOptions(newOptions);
+  };
 
   // Group PRs by status
   const groupedPRs = groupPRsByStatus(filteredPRs);
@@ -98,22 +109,11 @@ export const PRDashboard = () => {
         </Alert>
       )}
       
-      <Box sx={{ mb: 3 }}>
-        <TextField
-          fullWidth
-          placeholder="Search by title, author, or repository..."
-          variant="outlined"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
-          }}
-        />
-      </Box>
+      <PRFilters 
+        pullRequests={allPRs}
+        onChange={handleFilterChange}
+        options={filterOptions}
+      />
       
       <Paper sx={{ width: '100%', mb: 3 }}>
         <Tabs
@@ -154,11 +154,49 @@ export const PRDashboard = () => {
         </Tabs>
       </Paper>
       
+      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Typography variant="body2" color="text.secondary">
+          Showing {groupedPRs[activeTab]?.length || 0} of {filteredPRs.length} filtered pull requests
+        </Typography>
+        
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          {filterOptions.repositories.length > 0 && (
+            <Chip 
+              icon={<FilterIcon fontSize="small" />} 
+              label={`${filterOptions.repositories.length} repos`} 
+              size="small"
+              variant="outlined"
+              color="primary"
+            />
+          )}
+          
+          {filterOptions.authors.length > 0 && (
+            <Chip 
+              icon={<FilterIcon fontSize="small" />} 
+              label={`${filterOptions.authors.length} authors`} 
+              size="small"
+              variant="outlined"
+              color="primary"
+            />
+          )}
+          
+          {filterOptions.showStale && (
+            <Chip 
+              icon={<FilterIcon fontSize="small" />} 
+              label="Stale only" 
+              size="small"
+              variant="outlined"
+              color="warning"
+            />
+          )}
+        </Box>
+      </Box>
+      
       <Grid container spacing={3}>
         <Grid item xs={12}>
-          {filteredPRs.length === 0 && !loading ? (
+          {groupedPRs[activeTab]?.length === 0 && !loading ? (
             <Typography variant="body1" textAlign="center" sx={{ py: 4 }}>
-              No pull requests found. Try adjusting your search or configuration.
+              No pull requests found. Try adjusting your filters or configuration.
             </Typography>
           ) : (
             <PRList pullRequests={groupedPRs[activeTab] || []} />
