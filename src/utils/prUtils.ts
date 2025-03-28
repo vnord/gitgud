@@ -100,7 +100,6 @@ export interface FilterOptions {
   repositories: string[];
   authors: string[];
   hideStale: boolean;
-  showDrafts: boolean;
   sortBy: 'newest' | 'oldest' | 'updated' | 'title';
   prioritizeMyReviews: boolean;
 }
@@ -113,8 +112,8 @@ export const filterAndSortPRs = (
   
   // First filter the PRs
   const filteredPRs = prs.filter((pr) => {
-    // Filter out drafts if not showing them
-    if (pr.draft && !options.showDrafts) {
+    // We always filter out drafts in the main filter (they will appear in DRAFT tab)
+    if (pr.draft) {
       return false;
     }
     
@@ -175,16 +174,18 @@ export const filterAndSortPRs = (
 export const filterPRs = (
   prs: PullRequest[],
   query: string,
-  showDrafts: boolean
+  showDrafts: boolean // Parameter kept for backward compatibility
 ): PullRequest[] => {
+  // Only use drafts from the original PRs if showDrafts is true
+  const filteredPrs = showDrafts ? prs : prs.filter(pr => !pr.draft);
+  
   return filterAndSortPRs(
-    prs,
+    filteredPrs,
     {
       searchQuery: query,
       repositories: [],
       authors: [],
       hideStale: true,
-      showDrafts: showDrafts,
       sortBy: 'updated',
       prioritizeMyReviews: true
     }

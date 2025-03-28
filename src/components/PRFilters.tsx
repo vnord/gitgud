@@ -120,7 +120,6 @@ export const PRFilters = ({ pullRequests, onChange, options }: PRFiltersProps) =
       repositories: [],
       authors: [],
       hideStale: true,
-      showDrafts: false,
       sortBy: 'updated',
       prioritizeMyReviews: true,
     });
@@ -225,7 +224,7 @@ export const PRFilters = ({ pullRequests, onChange, options }: PRFiltersProps) =
           <Button
             variant="outlined"
             color={
-              !options.hideStale || options.showDrafts || !options.prioritizeMyReviews 
+              !options.hideStale || !options.prioritizeMyReviews 
                 ? "primary" 
                 : "inherit"
             }
@@ -238,9 +237,9 @@ export const PRFilters = ({ pullRequests, onChange, options }: PRFiltersProps) =
               minWidth: 0, 
               width: 100,
               height: '100%',
-              borderColor: (!options.hideStale || options.showDrafts || !options.prioritizeMyReviews) ? 'primary.main' : 'divider',
+              borderColor: (!options.hideStale || !options.prioritizeMyReviews) ? 'primary.main' : 'divider',
               '&:hover': {
-                borderColor: (!options.hideStale || options.showDrafts || !options.prioritizeMyReviews) ? 'primary.dark' : undefined
+                borderColor: (!options.hideStale || !options.prioritizeMyReviews) ? 'primary.dark' : undefined
               }
             }}
           >
@@ -305,27 +304,6 @@ export const PRFilters = ({ pullRequests, onChange, options }: PRFiltersProps) =
             />
           </MenuItem>
           
-          <MenuItem 
-            dense
-            onClick={() => {
-              onChange({...options, showDrafts: !options.showDrafts});
-            }}
-          >
-            <FormControlLabel
-              control={
-                <Switch 
-                  checked={options.showDrafts} 
-                  size="small" 
-                  onChange={(e) => {
-                    e.stopPropagation();
-                    onChange({...options, showDrafts: e.target.checked});
-                  }}
-                />
-              }
-              label="Show draft PRs"
-              sx={{ m: 0 }}
-            />
-          </MenuItem>
           
           <MenuItem 
             dense

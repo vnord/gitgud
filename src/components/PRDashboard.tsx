@@ -45,7 +45,6 @@ export const PRDashboard = () => {
       repositories: [],
       authors: [],
       hideStale: true,
-      showDrafts: false,
       sortBy: 'updated',
       prioritizeMyReviews: true
     };
