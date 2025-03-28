@@ -112,11 +112,6 @@ export const filterAndSortPRs = (
   
   // First filter the PRs
   const filteredPRs = prs.filter((pr) => {
-    // We always filter out drafts in the main filter (they will appear in DRAFT tab)
-    if (pr.draft) {
-      return false;
-    }
-    
     // Filter by repository if repositories are specified
     if (options.repositories.length > 0 && !options.repositories.includes(pr.repository.name)) {
       return false;
