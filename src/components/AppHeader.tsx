@@ -14,9 +14,10 @@ import { useAuth } from '../context/AuthContext';
 
 interface AppHeaderProps {
   onRefresh?: () => void;
+  onConfigClick?: () => void;
 }
 
-export const AppHeader = ({ onRefresh }: AppHeaderProps) => {
+export const AppHeader = ({ onRefresh, onConfigClick }: AppHeaderProps) => {
   const { token, logout } = useAuth();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   
@@ -30,6 +31,13 @@ export const AppHeader = ({ onRefresh }: AppHeaderProps) => {
 
   const handleLogout = () => {
     logout();
+    handleClose();
+  };
+  
+  const handleSettingsClick = () => {
+    if (onConfigClick) {
+      onConfigClick();
+    }
     handleClose();
   };
 
@@ -82,7 +90,7 @@ export const AppHeader = ({ onRefresh }: AppHeaderProps) => {
               open={Boolean(anchorEl)}
               onClose={handleClose}
             >
-              <MenuItem onClick={handleClose}>Settings</MenuItem>
+              <MenuItem onClick={handleSettingsClick}>Settings</MenuItem>
               <MenuItem onClick={handleLogout}>Logout</MenuItem>
             </Menu>
           </>

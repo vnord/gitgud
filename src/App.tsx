@@ -23,6 +23,7 @@ function AppContent() {
   const { token, setToken } = useAuth();
   const [isConfigured, setIsConfigured] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [showSettings, setShowSettings] = useState(false);
 
   // Check if app is configured on mount
   useEffect(() => {
@@ -49,15 +50,28 @@ function AppContent() {
   const handleLogin = (token: string) => {
     setToken(token);
   };
+  
+  const handleConfigClick = () => {
+    setShowSettings(true);
+  };
+  
+  const handleConfigComplete = () => {
+    setIsConfigured(true);
+    setShowSettings(false);
+    setRefreshKey((prev) => prev + 1); // Refresh after config changes
+  };
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <AppHeader onRefresh={isConfigured ? handleRefresh : undefined} />
+      <AppHeader 
+        onRefresh={isConfigured && !showSettings ? handleRefresh : undefined} 
+        onConfigClick={handleConfigClick}
+      />
       <Container component="main" sx={{ flexGrow: 1, py: 3 }}>
         {!token ? (
           <LoginScreen onLogin={handleLogin} />
-        ) : !isConfigured ? (
-          <ConfigScreen onComplete={() => setIsConfigured(true)} />
+        ) : !isConfigured || showSettings ? (
+          <ConfigScreen onComplete={handleConfigComplete} />
         ) : (
           <PRDashboard key={refreshKey} />
         )}
