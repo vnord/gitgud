@@ -7,20 +7,16 @@ import {
   Card,
   CardContent,
   Alert,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  SelectChangeEvent,
-  Chip,
   CircularProgress,
   Switch,
   FormControlLabel,
   Slider,
+  Divider,
 } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
 import { Repository } from '../types';
 import { fetchOrganizationRepos } from '../services/githubService';
+import { RepoSelector } from './RepoSelector';
 
 interface ConfigScreenProps {
   onComplete: () => void;
@@ -53,9 +49,7 @@ export const ConfigScreen = ({ onComplete }: ConfigScreenProps) => {
     }
   };
 
-  const handleRepoSelect = (event: SelectChangeEvent<number[]>) => {
-    const selectedIds = event.target.value as number[];
-    const newSelectedRepos = repositories.filter((repo) => selectedIds.includes(repo.id));
+  const handleRepoSelect = (newSelectedRepos: Repository[]) => {
     setSelectedRepos(newSelectedRepos);
   };
 
@@ -138,34 +132,27 @@ export const ConfigScreen = ({ onComplete }: ConfigScreenProps) => {
             </Box>
           </Box>
           
+          <Divider sx={{ my: 3 }} />
+          
           <Box sx={{ mb: 4 }}>
             <Typography variant="h6" component="h3" sx={{ mb: 2 }}>
               Repositories
             </Typography>
             
-            <FormControl fullWidth>
-              <InputLabel id="repo-select-label">Select Repositories</InputLabel>
-              <Select
-                labelId="repo-select-label"
-                multiple
-                value={selectedRepos.map((repo) => repo.id)}
-                onChange={handleRepoSelect}
-                renderValue={() => (
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                    {selectedRepos.map((repo) => (
-                      <Chip key={repo.id} label={repo.name} />
-                    ))}
-                  </Box>
-                )}
-              >
-                {repositories.map((repo) => (
-                  <MenuItem key={repo.id} value={repo.id}>
-                    {repo.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            {repositories.length > 0 ? (
+              <RepoSelector 
+                repositories={repositories} 
+                selectedRepos={selectedRepos} 
+                onChange={handleRepoSelect} 
+              />
+            ) : (
+              <Alert severity="info" sx={{ mb: 2 }}>
+                Search for an organization to see available repositories
+              </Alert>
+            )}
           </Box>
+          
+          <Divider sx={{ my: 3 }} />
           
           <Box sx={{ mb: 4 }}>
             <Typography variant="h6" component="h3" sx={{ mb: 2 }}>

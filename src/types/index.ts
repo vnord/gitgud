@@ -44,6 +44,10 @@ export interface Repository {
   name: string;
   full_name: string;
   html_url: string;
+  description?: string;
+  stars?: number;
+  forks?: number;
+  updated_at?: string;
   owner: {
     login: string;
     avatar_url: string;

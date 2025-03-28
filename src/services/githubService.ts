@@ -29,6 +29,10 @@ export const fetchOrganizationRepos = async (
       name: repo.name,
       full_name: repo.full_name,
       html_url: repo.html_url,
+      description: repo.description || '',
+      stars: repo.stargazers_count,
+      forks: repo.forks_count,
+      updated_at: repo.updated_at || undefined,
       owner: {
         login: repo.owner.login,
         avatar_url: repo.owner.avatar_url,
