@@ -16,7 +16,14 @@ import { useAuth } from '../context/AuthContext';
 import { useConfig } from '../context/ConfigContext';
 import { PullRequest, ReviewState } from '../types';
 import { fetchAllPRs, markRequestedReviewerPRs } from '../services/githubService';
-import { groupPRsByStatus, filterAndSortPRs, FilterOptions, getRepoColor } from '../utils/prUtils';
+import { 
+  groupPRsByStatus, 
+  filterAndSortPRs, 
+  FilterOptions, 
+  getRepoColor,
+  applyPinStatus,
+  togglePinPR
+} from '../utils/prUtils';
 import { PRList } from './PRList';
 import { PRFilters } from './PRFilters';
 
@@ -102,6 +109,9 @@ export const PRDashboard = () => {
       // Mark PRs where the current user is requested as a reviewer
       prs = await markRequestedReviewerPRs(token, prs);
       
+      // Apply pin status from localStorage
+      prs = applyPinStatus(prs);
+      
       setAllPRs(prs);
     } catch (err) {
       console.error(err);
@@ -149,6 +159,19 @@ export const PRDashboard = () => {
 
   const getStatusCount = (status: ReviewState) => {
     return groupedPRs[status]?.length || 0;
+  };
+  
+  // Handle toggling pin status for a PR
+  const handlePinToggle = (prId: string) => {
+    // Update localStorage
+    const isPinned = togglePinPR(prId);
+    
+    // Update the PR in our state
+    setAllPRs(prevPRs => 
+      prevPRs.map(pr => 
+        pr.id === prId ? { ...pr, isPinned } : pr
+      )
+    );
   };
 
   return (
@@ -317,7 +340,7 @@ export const PRDashboard = () => {
               No pull requests found. Try adjusting your filters or configuration.
             </Typography>
           ) : (
-            <PRList pullRequests={groupedPRs[activeTab] || []} />
+            <PRList pullRequests={groupedPRs[activeTab] || []} onPinToggle={handlePinToggle} />
           )}
         </Grid>
       </Grid>

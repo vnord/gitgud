@@ -42,6 +42,7 @@ export interface PullRequest {
   status?: ReviewState;
   stale?: boolean;
   userIsRequestedReviewer?: boolean;
+  isPinned?: boolean;
 }
 
 export interface Repository {

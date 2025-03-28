@@ -146,7 +146,11 @@ export const filterAndSortPRs = (
   
   // Then sort the filtered PRs
   return [...filteredPRs].sort((a, b) => {
-    // First prioritize PRs where the current user is requested as a reviewer if enabled
+    // First prioritize explicitly pinned PRs
+    if (a.isPinned && !b.isPinned) return -1;
+    if (!a.isPinned && b.isPinned) return 1;
+    
+    // Then prioritize PRs where the current user is requested as a reviewer if enabled
     if (options.prioritizeMyReviews) {
       if (a.userIsRequestedReviewer && !b.userIsRequestedReviewer) return -1;
       if (!a.userIsRequestedReviewer && b.userIsRequestedReviewer) return 1;
@@ -212,4 +216,64 @@ export const getRepoColor = (repoName: string): { bg: string; text: string } => 
     bg: `hsl(${hue}, 80%, 90%)`,
     text: `hsl(${hue}, 80%, 30%)`
   };
+};
+
+/**
+ * PIN FUNCTIONALITY
+ */
+
+const PINNED_PRS_KEY = 'pinned_prs';
+
+// Get pinned PRs from localStorage
+export const getPinnedPRs = (): string[] => {
+  try {
+    const pinnedPRs = localStorage.getItem(PINNED_PRS_KEY);
+    return pinnedPRs ? JSON.parse(pinnedPRs) : [];
+  } catch (e) {
+    console.error('Error parsing pinned PRs:', e);
+    return [];
+  }
+};
+
+// Add PR ID to pinned list
+export const pinPR = (prId: string): void => {
+  const pinnedPRs = getPinnedPRs();
+  if (!pinnedPRs.includes(prId)) {
+    pinnedPRs.push(prId);
+    localStorage.setItem(PINNED_PRS_KEY, JSON.stringify(pinnedPRs));
+  }
+};
+
+// Remove PR ID from pinned list
+export const unpinPR = (prId: string): void => {
+  const pinnedPRs = getPinnedPRs();
+  const index = pinnedPRs.indexOf(prId);
+  if (index !== -1) {
+    pinnedPRs.splice(index, 1);
+    localStorage.setItem(PINNED_PRS_KEY, JSON.stringify(pinnedPRs));
+  }
+};
+
+// Toggle PR pin status
+export const togglePinPR = (prId: string): boolean => {
+  const pinnedPRs = getPinnedPRs();
+  const isPinned = pinnedPRs.includes(prId);
+  
+  if (isPinned) {
+    unpinPR(prId);
+    return false;
+  } else {
+    pinPR(prId);
+    return true;
+  }
+};
+
+// Apply pin status to PR list
+export const applyPinStatus = (prs: PullRequest[]): PullRequest[] => {
+  const pinnedPRs = getPinnedPRs();
+  
+  return prs.map(pr => ({
+    ...pr,
+    isPinned: pinnedPRs.includes(pr.id)
+  }));
 };
