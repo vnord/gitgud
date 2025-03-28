@@ -353,7 +353,7 @@ export const PRFilters = ({ pullRequests, onChange, options }: PRFiltersProps) =
       
       <Collapse in={expandedFilters}>
         <Grid container spacing={2} sx={{ mb: 2 }}>
-          <Grid item xs={12} md={4}>
+          <Grid item xs={12} md={6}>
             <Autocomplete
               multiple
               options={uniqueRepos.sort()}
@@ -412,7 +412,7 @@ export const PRFilters = ({ pullRequests, onChange, options }: PRFiltersProps) =
             />
           </Grid>
           
-          <Grid item xs={12} md={4}>
+          <Grid item xs={12} md={6}>
             <Autocomplete
               multiple
               options={uniqueAuthors.sort()}
@@ -437,24 +437,6 @@ export const PRFilters = ({ pullRequests, onChange, options }: PRFiltersProps) =
                 ))
               }
             />
-          </Grid>
-          
-          <Grid item xs={12} md={4}>
-            <FormControl fullWidth size="small">
-              <InputLabel id="sort-select-label">Sort By</InputLabel>
-              <Select
-                labelId="sort-select-label"
-                value={options.sortBy}
-                label="Sort By"
-                onChange={handleSortChange}
-                startAdornment={<SortIcon fontSize="small" sx={{ mr: 1 }} />}
-              >
-                <MenuItem value="updated">Recently Updated</MenuItem>
-                <MenuItem value="newest">Newest First</MenuItem>
-                <MenuItem value="oldest">Oldest First</MenuItem>
-                <MenuItem value="title">Alphabetical</MenuItem>
-              </Select>
-            </FormControl>
           </Grid>
         </Grid>
         
