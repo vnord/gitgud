@@ -3,7 +3,6 @@ import {
   Box,
   TextField,
   InputAdornment,
-  IconButton,
   MenuItem,
   Autocomplete,
   Chip,
@@ -18,9 +17,6 @@ import {
   SelectChangeEvent,
   Grid,
   Menu,
-  ListItemIcon,
-  ListItemText,
-  Divider,
   Typography,
 } from '@mui/material';
 import {
@@ -30,8 +26,6 @@ import {
   ExpandMore as ExpandMoreIcon,
   ExpandLess as ExpandLessIcon,
   Code as CodeIcon,
-  Tune as TuneIcon,
-  Settings as SettingsIcon,
   Visibility as VisibilityIcon,
 } from '@mui/icons-material';
 import { PullRequest } from '../types';
@@ -110,29 +104,6 @@ export const PRFilters = ({ pullRequests, onChange, options }: PRFiltersProps) =
     });
   };
   
-  // Handle hide stale toggle change
-  const handleHideStaleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onChange({
-      ...options,
-      hideStale: event.target.checked,
-    });
-  };
-  
-  // Handle show drafts toggle change
-  const handleShowDraftsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onChange({
-      ...options,
-      showDrafts: event.target.checked,
-    });
-  };
-  
-  // Handle prioritize my reviews toggle change
-  const handlePrioritizeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onChange({
-      ...options,
-      prioritizeMyReviews: event.target.checked,
-    });
-  };
   
   // Handle sort option change
   const handleSortChange = (event: SelectChangeEvent<SortOption>) => {
