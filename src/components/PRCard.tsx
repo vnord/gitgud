@@ -12,6 +12,7 @@ import {
   ErrorOutline as ErrorIcon,
   AccessTime as TimeIcon,
   Code as CodeIcon,
+  AssignmentTurnedIn as ReviewRequestIcon,
 } from '@mui/icons-material';
 import { PullRequest, ReviewState } from '../types';
 import { formatTimeAgo } from '../utils/prUtils';
@@ -54,7 +55,14 @@ export const PRCard = ({ pullRequest }: PRCardProps) => {
   };
 
   return (
-    <Card variant="outlined">
+    <Card 
+      variant="outlined"
+      sx={{ 
+        borderLeft: pullRequest.userIsRequestedReviewer ? '4px solid' : 'none',
+        borderLeftColor: pullRequest.userIsRequestedReviewer ? theme.palette.info.main : 'transparent',
+        bgcolor: pullRequest.userIsRequestedReviewer ? 'rgba(25, 118, 210, 0.05)' : 'transparent',
+      }}
+    >
       <CardContent>
         <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 2 }}>
           <Avatar
@@ -105,6 +113,15 @@ export const PRCard = ({ pullRequest }: PRCardProps) => {
                   label="Stale"
                   icon={<ErrorIcon />}
                   color="warning"
+                />
+              )}
+              {pullRequest.userIsRequestedReviewer && (
+                <Chip
+                  size="small"
+                  label="Your Review Requested"
+                  icon={<ReviewRequestIcon />}
+                  color="info"
+                  sx={{ fontWeight: 'bold' }}
                 />
               )}
             </Box>

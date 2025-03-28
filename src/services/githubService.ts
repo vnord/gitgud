@@ -120,6 +120,10 @@ export const fetchRepositoryPRs = async (
             full_name: `${owner}/${repo}`,
             html_url: `https://github.com/${owner}/${repo}`,
           },
+          requested_reviewers: pr.requested_reviewers?.map(reviewer => ({
+            login: reviewer.login,
+            avatar_url: reviewer.avatar_url,
+          })) || [],
           reviews,
         };
         
@@ -168,5 +172,45 @@ export const validateToken = async (token: string): Promise<boolean> => {
   } catch (error) {
     console.error('Token validation error:', error);
     return false;
+  }
+};
+
+/**
+ * Get current authenticated user
+ */
+export const getCurrentUser = async (token: string): Promise<{login: string; avatar_url: string} | null> => {
+  try {
+    const octokit = createOctokit(token);
+    const { data } = await octokit.users.getAuthenticated();
+    return {
+      login: data.login,
+      avatar_url: data.avatar_url,
+    };
+  } catch (error) {
+    console.error('Error getting current user:', error);
+    return null;
+  }
+};
+
+/**
+ * Check if PRs have the current user as a requested reviewer
+ */
+export const markRequestedReviewerPRs = async (
+  token: string,
+  prs: PullRequest[]
+): Promise<PullRequest[]> => {
+  try {
+    const currentUser = await getCurrentUser(token);
+    if (!currentUser) return prs;
+    
+    return prs.map(pr => ({
+      ...pr,
+      userIsRequestedReviewer: pr.requested_reviewers?.some(
+        reviewer => reviewer.login === currentUser.login
+      ) || false,
+    }));
+  } catch (error) {
+    console.error('Error marking requested reviewer PRs:', error);
+    return prs;
   }
 };

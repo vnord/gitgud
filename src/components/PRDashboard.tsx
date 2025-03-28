@@ -14,7 +14,7 @@ import {
 import { FilterAlt as FilterIcon } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import { PullRequest, ReviewState } from '../types';
-import { fetchAllPRs } from '../services/githubService';
+import { fetchAllPRs, markRequestedReviewerPRs } from '../services/githubService';
 import { groupPRsByStatus, filterAndSortPRs, FilterOptions } from '../utils/prUtils';
 import { PRList } from './PRList';
 import { PRFilters } from './PRFilters';
@@ -31,8 +31,9 @@ export const PRDashboard = () => {
     searchQuery: '',
     repositories: [],
     authors: [],
-    showStale: false,
-    sortBy: 'updated'
+    hideStale: true,
+    sortBy: 'updated',
+    prioritizeMyReviews: true
   });
 
   // Get config from localStorage
@@ -57,11 +58,16 @@ export const PRDashboard = () => {
     setError('');
     
     try {
-      const prs = await fetchAllPRs(
+      // Fetch PRs from all configured repositories
+      let prs = await fetchAllPRs(
         token,
         config.repositories,
         config.staleThresholdDays || 7
       );
+      
+      // Mark PRs where the current user is requested as a reviewer
+      prs = await markRequestedReviewerPRs(token, prs);
+      
       setAllPRs(prs);
     } catch (err) {
       console.error(err);
@@ -180,13 +186,23 @@ export const PRDashboard = () => {
             />
           )}
           
-          {filterOptions.showStale && (
+          {!filterOptions.hideStale && (
             <Chip 
               icon={<FilterIcon fontSize="small" />} 
-              label="Stale only" 
+              label="Including stale PRs" 
               size="small"
               variant="outlined"
               color="warning"
+            />
+          )}
+          
+          {!filterOptions.prioritizeMyReviews && (
+            <Chip 
+              icon={<FilterIcon fontSize="small" />} 
+              label="Not prioritizing review requests" 
+              size="small"
+              variant="outlined"
+              color="info"
             />
           )}
         </Box>

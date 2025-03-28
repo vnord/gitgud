@@ -99,8 +99,9 @@ export interface FilterOptions {
   searchQuery: string;
   repositories: string[];
   authors: string[];
-  showStale: boolean;
+  hideStale: boolean;
   sortBy: 'newest' | 'oldest' | 'updated' | 'title';
+  prioritizeMyReviews: boolean;
 }
 
 export const filterAndSortPRs = (
@@ -127,8 +128,8 @@ export const filterAndSortPRs = (
       return false;
     }
     
-    // Filter by stale status if showStale is true
-    if (options.showStale && !pr.stale) {
+    // Filter out stale PRs if hideStale is true
+    if (options.hideStale && pr.stale) {
       return false;
     }
     
@@ -146,6 +147,13 @@ export const filterAndSortPRs = (
   
   // Then sort the filtered PRs
   return [...filteredPRs].sort((a, b) => {
+    // First prioritize PRs where the current user is requested as a reviewer if enabled
+    if (options.prioritizeMyReviews) {
+      if (a.userIsRequestedReviewer && !b.userIsRequestedReviewer) return -1;
+      if (!a.userIsRequestedReviewer && b.userIsRequestedReviewer) return 1;
+    }
+    
+    // Then sort by the selected sort option
     switch (options.sortBy) {
       case 'newest':
         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
@@ -175,8 +183,9 @@ export const filterPRs = (
       searchQuery: query,
       repositories: [],
       authors: [],
-      showStale: false,
-      sortBy: 'updated'
+      hideStale: true,
+      sortBy: 'updated',
+      prioritizeMyReviews: true
     },
     showDrafts
   );

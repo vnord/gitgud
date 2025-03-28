@@ -29,13 +29,8 @@ import { PullRequest } from '../types';
 
 export type SortOption = 'newest' | 'oldest' | 'updated' | 'title';
 
-export interface FilterOptions {
-  searchQuery: string;
-  repositories: string[];
-  authors: string[];
-  showStale: boolean;
-  sortBy: SortOption;
-}
+// Import the FilterOptions type from prUtils instead of redefining it
+import { FilterOptions } from '../utils/prUtils';
 
 interface PRFiltersProps {
   pullRequests: PullRequest[];
@@ -74,11 +69,19 @@ export const PRFilters = ({ pullRequests, onChange, options }: PRFiltersProps) =
     });
   };
   
-  // Handle stale toggle change
-  const handleStaleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle hide stale toggle change
+  const handleHideStaleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     onChange({
       ...options,
-      showStale: event.target.checked,
+      hideStale: event.target.checked,
+    });
+  };
+  
+  // Handle prioritize my reviews toggle change
+  const handlePrioritizeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    onChange({
+      ...options,
+      prioritizeMyReviews: event.target.checked,
     });
   };
   
@@ -96,8 +99,9 @@ export const PRFilters = ({ pullRequests, onChange, options }: PRFiltersProps) =
       searchQuery: '',
       repositories: [],
       authors: [],
-      showStale: false,
+      hideStale: true,
       sortBy: 'updated',
+      prioritizeMyReviews: true,
     });
   };
   
@@ -106,7 +110,8 @@ export const PRFilters = ({ pullRequests, onChange, options }: PRFiltersProps) =
     (options.searchQuery ? 1 : 0) +
     options.repositories.length +
     options.authors.length +
-    (options.showStale ? 1 : 0)
+    (!options.hideStale ? 1 : 0) + // Count when not using default (hide stale)
+    (!options.prioritizeMyReviews ? 1 : 0) // Count when not using default (prioritize reviews)
   );
   
   return (
@@ -231,16 +236,29 @@ export const PRFilters = ({ pullRequests, onChange, options }: PRFiltersProps) =
           borderTop: '1px solid',
           borderColor: 'divider',
         }}>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={options.showStale}
-                onChange={handleStaleChange}
-                size="small"
-              />
-            }
-            label="Show stale PRs only"
-          />
+          <Box sx={{ display: 'flex', gap: 3 }}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={options.hideStale}
+                  onChange={handleHideStaleChange}
+                  size="small"
+                />
+              }
+              label="Hide stale PRs"
+            />
+            
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={options.prioritizeMyReviews}
+                  onChange={handlePrioritizeChange}
+                  size="small"
+                />
+              }
+              label="Prioritize my review requests"
+            />
+          </Box>
           
           <Button 
             variant="text" 

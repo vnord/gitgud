@@ -33,10 +33,15 @@ export interface PullRequest {
     full_name: string;
     html_url: string;
   };
+  requested_reviewers?: {
+    login: string;
+    avatar_url: string;
+  }[];
   reviewDecision?: string;
   reviews?: Review[];
   status?: ReviewState;
   stale?: boolean;
+  userIsRequestedReviewer?: boolean;
 }
 
 export interface Repository {
