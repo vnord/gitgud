@@ -181,10 +181,10 @@ export const ConfigScreen = ({ onComplete }: ConfigScreenProps) => {
                     color="primary"
                   />
                 }
-                label="Prioritize my review requests"
+                label="Highlight my review requests"
               />
               <Typography variant="caption" color="text.secondary" sx={{ display: 'block', ml: 4 }}>
-                PRs where you're requested as a reviewer will be highlighted and shown first
+                Enhance visibility of PRs where you're a requested reviewer
               </Typography>
             </Box>
           </Box>

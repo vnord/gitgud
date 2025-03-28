@@ -165,20 +165,6 @@ export const PRFilters = ({ pullRequests, onChange, options }: PRFiltersProps) =
             </Select>
           </FormControl>
           
-          {/* Stale PRs toggle */}
-          <FormControlLabel
-            control={
-              <Switch 
-                checked={options.hideStale} 
-                size="small" 
-                onChange={(e) => onChange({...options, hideStale: e.target.checked})}
-                color="primary"
-              />
-            }
-            label="Hide stale"
-            sx={{ m: 0, ml: 1 }}
-          />
-          
           {/* Filter button */}
           <Button
             variant="outlined"
@@ -317,12 +303,24 @@ export const PRFilters = ({ pullRequests, onChange, options }: PRFiltersProps) =
         
         <Box sx={{ 
           display: 'flex', 
-          justifyContent: 'flex-end', 
+          justifyContent: 'space-between', 
           alignItems: 'center',
           pt: 1,
           borderTop: '1px solid',
           borderColor: 'divider',
         }}>
+          <FormControlLabel
+            control={
+              <Switch 
+                checked={options.hideStale} 
+                size="small" 
+                onChange={(e) => onChange({...options, hideStale: e.target.checked})}
+                color="primary"
+              />
+            }
+            label="Hide stale PRs"
+          />
+          
           <Button 
             variant="outlined" 
             onClick={resetFilters}
