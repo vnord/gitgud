@@ -13,11 +13,8 @@ import {
   Button,
   Select,
   FormControl,
-  InputLabel,
   SelectChangeEvent,
   Grid,
-  Menu,
-  Typography,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -26,7 +23,6 @@ import {
   ExpandMore as ExpandMoreIcon,
   ExpandLess as ExpandLessIcon,
   Code as CodeIcon,
-  Visibility as VisibilityIcon,
 } from '@mui/icons-material';
 import { PullRequest } from '../types';
 
