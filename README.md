@@ -2,8 +2,6 @@
 
 GitGud is a lightweight, client-side dashboard for GitHub pull requests that helps teams get a better overview of PR status across repositories. This tool provides a single view of all open PRs grouped by their review status.
 
-![GitGud PR Dashboard](./public/preview.png)
-
 ## Features
 
 - **Overview Dashboard**: See all your open PRs in one place
