@@ -3,12 +3,35 @@ import { PullRequest, ReviewState } from '../types';
 
 /**
  * Determines if a PR has changes requested by any reviewer
+ * Checks if there are active CHANGES_REQUESTED reviews that haven't been addressed
  */
 export const hasChangesRequested = (pr: PullRequest): boolean => {
-  return (
-    pr.reviews?.some((review) => review.state === 'CHANGES_REQUESTED') ||
-    pr.reviewDecision === 'CHANGES_REQUESTED'
+  // Check if there are any CHANGES_REQUESTED reviews
+  const changesRequestedReviews = pr.reviews?.filter(
+    (review) => review.state === 'CHANGES_REQUESTED'
   );
+  
+  // If no changes requested reviews, only check GitHub's reviewDecision
+  if (!changesRequestedReviews?.length) {
+    return pr.reviewDecision === 'CHANGES_REQUESTED';
+  }
+  
+  // If there are changes requested reviews, check if they've been addressed
+  // by new commits that came after the review
+  if (pr.lastCommitDate) {
+    const lastCommitTime = new Date(pr.lastCommitDate);
+    const activeChangesRequested = changesRequestedReviews.some(
+      (review) => new Date(review.submitted_at) > lastCommitTime
+    );
+    
+    // Only consider changes requested if there are active review requests
+    // (reviews that came after the last commit)
+    return activeChangesRequested;
+  }
+  
+  // If we have CHANGES_REQUESTED reviews but no lastCommitDate information,
+  // assume the changes are still requested
+  return true;
 };
 
 /**
