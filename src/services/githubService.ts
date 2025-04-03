@@ -160,7 +160,7 @@ export const fetchRepositoryPRs = async (
             avatar_url: reviewer.avatar_url,
           })) || [],
           reviews,
-          lastCommitDate,
+          lastCommitDate: lastCommitDate || undefined,
         };
         
         // Process and categorize the PR

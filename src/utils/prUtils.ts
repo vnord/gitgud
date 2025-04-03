@@ -27,7 +27,7 @@ export const needsReview = (pr: PullRequest): boolean => {
   return (
     !pr.reviews?.some((review) => review.state === 'APPROVED') ||
     pr.reviewDecision === 'REVIEW_REQUIRED' ||
-    hasNewCommitsAfterChangesRequested
+    !!hasNewCommitsAfterChangesRequested
   );
 };
 
