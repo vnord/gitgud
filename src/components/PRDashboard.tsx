@@ -121,9 +121,17 @@ export const PRDashboard = () => {
     }
   };
 
-  // Fetch PRs on component mount
+  // Fetch PRs on component mount and refresh every 5 minutes
   useEffect(() => {
     fetchPRs();
+    
+    // Set up periodic refresh every 5 minutes
+    const refreshInterval = setInterval(() => {
+      fetchPRs();
+    }, 5 * 60 * 1000);
+    
+    // Clear interval on component unmount
+    return () => clearInterval(refreshInterval);
   }, [token]);
 
   // Filter PRs whenever filter options or PR list changes

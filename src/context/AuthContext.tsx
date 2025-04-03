@@ -1,4 +1,4 @@
-import { createContext, useState, useContext, ReactNode } from 'react';
+import { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 import { Octokit } from '@octokit/rest';
 import { AuthContextType } from '../types';
 
@@ -18,6 +18,25 @@ interface AuthProviderProps {
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [token, setToken] = useState<string | null>(localStorage.getItem('github_token'));
+
+  // Check token validity on mount and when token changes
+  useEffect(() => {
+    const validateExistingToken = async () => {
+      if (token) {
+        try {
+          const octokit = new Octokit({ auth: token });
+          await octokit.users.getAuthenticated();
+        } catch (error) {
+          console.error('Token validation error:', error);
+          // Token is invalid or expired, clear it
+          localStorage.removeItem('github_token');
+          setToken(null);
+        }
+      }
+    };
+    
+    validateExistingToken();
+  }, [token]);
 
   // Validate token by making a simple API call
   const login = async (newToken: string): Promise<boolean> => {

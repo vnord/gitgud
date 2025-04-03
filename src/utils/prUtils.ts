@@ -13,11 +13,21 @@ export const hasChangesRequested = (pr: PullRequest): boolean => {
 
 /**
  * Determines if a PR needs review (no approvals or review required)
+ * Also checks if PR has new commits after a changes requested review
  */
 export const needsReview = (pr: PullRequest): boolean => {
+  // Check if there are new commits after changes requested review
+  const hasNewCommitsAfterChangesRequested = 
+    pr.lastCommitDate && 
+    pr.reviews?.some(review => 
+      review.state === 'CHANGES_REQUESTED' && 
+      new Date(pr.lastCommitDate!) > new Date(review.submitted_at)
+    );
+
   return (
     !pr.reviews?.some((review) => review.state === 'APPROVED') ||
-    pr.reviewDecision === 'REVIEW_REQUIRED'
+    pr.reviewDecision === 'REVIEW_REQUIRED' ||
+    hasNewCommitsAfterChangesRequested
   );
 };
 

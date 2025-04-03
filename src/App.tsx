@@ -25,7 +25,7 @@ function AppContent() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [showSettings, setShowSettings] = useState(false);
 
-  // Check if app is configured on mount
+  // Check if app is configured on mount and when refreshKey changes
   useEffect(() => {
     const config = localStorage.getItem('app_config');
     if (config) {
@@ -36,12 +36,17 @@ function AppContent() {
           parsedConfig.repositories.length > 0
         ) {
           setIsConfigured(true);
+        } else {
+          setIsConfigured(false);
         }
       } catch (e) {
         console.error('Error parsing config:', e);
+        setIsConfigured(false);
       }
+    } else {
+      setIsConfigured(false);
     }
-  }, []);
+  }, [refreshKey]);
 
   const handleRefresh = () => {
     setRefreshKey((prev) => prev + 1);

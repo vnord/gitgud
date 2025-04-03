@@ -43,6 +43,7 @@ export interface PullRequest {
   stale?: boolean;
   userIsRequestedReviewer?: boolean;
   isPinned?: boolean;
+  lastCommitDate?: string;
 }
 
 export interface Repository {

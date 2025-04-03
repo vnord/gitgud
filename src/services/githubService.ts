@@ -78,6 +78,38 @@ export const fetchPRReviews = async (
 };
 
 /**
+ * Fetch the most recent commit date for a PR
+ */
+export const fetchLastCommitDate = async (
+  token: string,
+  owner: string,
+  repo: string,
+  pullNumber: number
+): Promise<string | null> => {
+  try {
+    const octokit = createOctokit(token);
+    
+    const { data } = await octokit.pulls.listCommits({
+      owner,
+      repo,
+      pull_number: pullNumber,
+      per_page: 1,
+      sort: 'updated',
+      direction: 'desc'
+    });
+    
+    if (data.length > 0 && data[0].commit) {
+      return data[0].commit.committer?.date || null;
+    }
+    
+    return null;
+  } catch (error) {
+    console.error(`Error fetching last commit for PR #${pullNumber}:`, error);
+    return null;
+  }
+};
+
+/**
  * Fetch open PRs for a specific repository
  */
 export const fetchRepositoryPRs = async (
@@ -102,6 +134,9 @@ export const fetchRepositoryPRs = async (
         // Fetch reviews for each PR
         const reviews = await fetchPRReviews(token, owner, repo, pr.number);
         
+        // Fetch the last commit date
+        const lastCommitDate = await fetchLastCommitDate(token, owner, repo, pr.number);
+        
         const pullRequest: PullRequest = {
           id: pr.id.toString(),
           number: pr.number,
@@ -125,6 +160,7 @@ export const fetchRepositoryPRs = async (
             avatar_url: reviewer.avatar_url,
           })) || [],
           reviews,
+          lastCommitDate,
         };
         
         // Process and categorize the PR
