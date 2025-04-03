@@ -2,14 +2,23 @@
 
 ## Build Commands
 - Install dependencies: `npm install`
+- Build application: `npm run build`
 - Start application: `npm start` (if implemented)
 
 ## Lint Commands
-- Run linting: `npm run lint` (if configured)
+- Run linting: `npm run lint`
+- Run TypeScript type checking: `npx tsc --noEmit`
+
+## ESLint Setup
+If ESLint is not configured, run: `npm init @eslint/config`
 
 ## Test Commands
 - Run all tests: `npm test` (if configured)
 - Run a single test: `npm test -- -t "test name"` (if using Jest)
+
+## Version Management
+- Update package.json version number after significant changes
+- Commit changes with updated version when implementing major features or fixes
 
 ## Code Style Guidelines
 - **Naming**: Use camelCase for variables/functions, PascalCase for classes

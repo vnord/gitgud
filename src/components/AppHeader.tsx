@@ -11,6 +11,7 @@ import {
 import { Settings as SettingsIcon, Refresh as RefreshIcon } from '@mui/icons-material';
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import packageInfo from '../../package.json';
 
 interface AppHeaderProps {
   onRefresh?: () => void;
@@ -50,6 +51,12 @@ export const AppHeader = ({ onRefresh, onConfigClick }: AppHeaderProps) => {
               👍
             </span>
             GitGud PR Dashboard
+            <Typography
+              variant="caption"
+              sx={{ ml: 1, opacity: 0.7, alignSelf: 'flex-end', mb: 0.5 }}
+            >
+              v{packageInfo.version}
+            </Typography>
           </Box>
         </Typography>
         
